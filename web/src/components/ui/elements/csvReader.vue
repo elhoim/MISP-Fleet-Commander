@@ -255,9 +255,19 @@ export default {
             }
             let tmpCsv = []
             csvLines.forEach(line => {
-                let list = line.split(this.delimiter)
-                list = list.map((str) => {
-                    return str.startsWith('"') && str.endsWith('"') ? str.slice(1, -1) : str
+                let regex = new RegExp(
+                    `${this.delimiter}(?=(?:[^"]*"[^"]*")*[^"]*$)`
+                )
+
+                let list = line.split(regex)
+                list = list.map(str => {
+                    str = str.trim()
+
+                    if (str.startsWith('"') && str.endsWith('"')) {
+                        str = str.slice(1, -1).replace(/""/g, '"')
+                    }
+
+                    return str
                 })
                 tmpCsv.push(list)
             })

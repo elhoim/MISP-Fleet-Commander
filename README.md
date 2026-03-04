@@ -23,9 +23,9 @@ With MISP Fleet Commander, you can diagnose, configure, update, and monitor MISP
 
 ## 💡 Why This Project?
 
-> Back in 2021, I was managing multiple MISP servers and found myself constantly repeating tasks — monitoring health, tweaking configs, running the same API calls across instances. I also wanted to explore some modern web technologies I wasn’t familiar with. So, I started building MISP Fleet Commander in my spare time — mostly just for fun.
+> Back in 2020, I was managing multiple MISP servers and found myself constantly repeating tasks — monitoring health, tweaking configs, running the same API calls across instances. I also wanted to explore some modern web technologies I wasn’t familiar with. So, I started building MISP Fleet Commander in my spare time — mostly just for fun.
 >
-> Now, in 2025 — four years later — it’s finally stable enough to share with the world.
+> Now, in 2025 — five years later — it’s finally stable enough to share with the world.
 
 This is a project built out of real-world need, shaped by curiosity and the desire to experiment and have fun. If you’ve ever had to wrangle a fleet of MISP servers, this tool is for you.
 
