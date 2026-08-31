@@ -519,13 +519,13 @@ def parseGetSyncOvertime(syncLogs, afterTime=None):
         afterTime = dt.now() - timedelta(days=7)
     servers = defaultdict(dict)
     for logEntry in syncLogs:
-        if title.startsWith('Pull from'):
+        title = logEntry['Log']['title']
+        if title.startswith('Pull from'):
             created = dt.fromisoformat(logEntry['Log']['created'])
             if created > afterTime:
-                title = logEntry['Log']['title']
                 url = re.search(r'Pull from (?P<url>[\S]+) .*', title).group('url')
                 change = logEntry['Log']['change']
-                parsedChange = re.search(r'(?P<events>[\d]+) events, (?P<proposals>[\d]+) proposals and (?P<sightings>[\d]+) sightings pulled or updated. (?P<event_failed>[\d]+) events failed or didn\'t need an update.', change)
+                parsedChange = re.search(r'(?P<events>[\d]+) events, (?P<proposals>[\d]+) proposals and (?P<sightings>[\d]+) sightings pulled or updated. (?P<events_failed>[\d]+) events failed or didn\'t need an update.', change)
                 syncMetrics = {
                     'events': parsedChange.group('events'),
                     'events_failed': parsedChange.group('events_failed'),
