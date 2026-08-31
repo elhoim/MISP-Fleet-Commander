@@ -1,9 +1,43 @@
 from os import environ
+from os import fdopen
+from os import getpid
+from os import makedirs
+from os import open as osOpen
+from os import replace
 from os import path as osPath
+from os import O_CREAT, O_EXCL, O_WRONLY
 import secrets
+from time import sleep
 
 
 basedir = osPath.abspath(osPath.dirname(__file__))
+
+
+def getPersistentSecretKey():
+    """Return a secret key shared by every process, generating it once on disk.
+
+    The key must be identical in the web application and in the workers,
+    otherwise the tokens signed by one process cannot be validated by another.
+    """
+    keyDir = osPath.join(basedir, 'database')
+    keyPath = osPath.join(keyDir, 'secret_key')
+    makedirs(keyDir, exist_ok=True)
+    for _ in range(10):
+        try:
+            with open(keyPath) as f:
+                key = f.read().strip()
+            if key:
+                return key
+        except FileNotFoundError:
+            tmpPath = f'{keyPath}.{getpid()}'
+            fd = osOpen(tmpPath, O_CREAT | O_EXCL | O_WRONLY, 0o600)
+            with fdopen(fd, 'w') as f:
+                f.write(secrets.token_hex())
+            replace(tmpPath, keyPath)
+            continue
+        sleep(0.1)
+    raise RuntimeError(f'Unable to read or create the secret key file {keyPath}')
+
 
 class Config:
     """Set Flask configuration vars from .env file."""
@@ -11,7 +45,7 @@ class Config:
     # General
     FLASK_DEBUG = environ.get('FLASK_DEBUG')
     FLASK_ENV = environ.get('FLASK_ENV')
-    SECRET_KEY = environ.get("SECRET_KEY", secrets.token_hex())
+    SECRET_KEY = environ.get("SECRET_KEY") or getPersistentSecretKey()
     TOKEN_EXPIRATION_MIN = environ.get("TOKEN_EXPIRATION_MIN", 60 * 12)
 
     # Database
