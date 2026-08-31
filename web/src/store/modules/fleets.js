@@ -149,13 +149,9 @@ const mutations = {
         })
     },
     setFleet(state, fleet) {
-        for (let i = 0; i < state.all.length; i++) {
-            if (state.all[i].id == fleet.id) {
-                const updatedFleet = state.all[i] = {...state.all[i], fleet}
-                Vue.set(state.all, i, updatedFleet)
-                break
-            }
-        }
+        const knownFleet = state.all[fleet.id]
+        const updatedFleet = knownFleet !== undefined ? {...knownFleet, ...fleet} : fleet
+        Vue.set(state.all, fleet.id, updatedFleet)
     },
     setFleetTimestamps(state, fleetTimestamps) {
         const knownFleets = Object.values(state.all) // Looks like we cannot use getters in mutation
