@@ -56,13 +56,13 @@ export default {
     computed: {
         integerTimestamp() {
             const timestampValue = Number.parseInt(this.timestamp)
-            return Number.isNaN(this.timestampValue) ? false : timestampValue
+            return Number.isNaN(timestampValue) ? false : timestampValue
         },
         validTimestamp() {
             return Number.isInteger(this.integerTimestamp) ? this.integerTimestamp : false
         },
         moreThanOneDay() {
-            return (new Date()).getTime()/1000 - this.integerTimestamp > 3600
+            return this.validTimestamp === false ? false : (new Date()).getTime()/1000 - this.integerTimestamp > 3600
         },
         clockMarginClass() {
             return this.clockNoMargin ? "" : "mr-1"
