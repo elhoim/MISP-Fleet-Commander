@@ -18,7 +18,7 @@ const getters = {
 
 // actions
 const actions = {
-    getConnections({ commit }, payload={}) {
+    getConnections({ commit, getters }, payload={}) {
         return new Promise((resolve, reject) => {
             if (payload.init_only && getters.connectionCount > 0) {
                 resolve("Server already loaded")
