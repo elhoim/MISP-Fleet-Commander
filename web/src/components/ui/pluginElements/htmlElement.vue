@@ -21,13 +21,18 @@ const ALLOWED_TAG_ATTRIBUTES = {
 }
 const URL_ATTRIBUTES = { a: 'href', iframe: 'src', img: 'src' }
 const ALLOWED_URL_PROTOCOLS = { a: ['http:', 'https:', 'mailto:'], iframe: ['http:', 'https:'], img: ['http:', 'https:'] }
-// Only geometry properties survive, and a transform may only shrink, so an
-// inline style cannot be used to float content over the surrounding page.
+// Only geometry properties survive. A transform may only shrink, and its origin
+// is restricted to keywords and in-box percentages, so the displacement a
+// transform can introduce stays within the element's own box.
 const ALLOWED_STYLE_PROPERTIES = new Set([
     'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
     'transform', 'transform-origin', 'background-color',
 ])
 const ALLOWED_TRANSFORM = /^scale\((0(\.\d+)?|1)(, ?(0(\.\d+)?|1))?\)$/
+const TRANSFORM_ORIGIN_POSITION = '(left|right|center|top|bottom|(100|\\d{1,2}(\\.\\d+)?)%)'
+// Firefox serializes the origin with an explicit zero z-offset ("left top 0px").
+const ALLOWED_TRANSFORM_ORIGIN = new RegExp(
+    `^${TRANSFORM_ORIGIN_POSITION}( ${TRANSFORM_ORIGIN_POSITION})?( 0(px)?)?$`, 'i')
 
 function isSafeUrl(url, protocols) {
     try {
@@ -44,6 +49,13 @@ function sanitizeStyle(element) {
         }
     })
     if (element.style.transform && !ALLOWED_TRANSFORM.test(element.style.transform)) {
+        element.style.removeProperty('transform')
+    }
+    // An unbounded origin turns even a shrinking scale into an arbitrary
+    // translation, so only keyword and in-box percentage origins are kept.
+    if (element.style.transformOrigin
+        && !ALLOWED_TRANSFORM_ORIGIN.test(element.style.transformOrigin.trim())) {
+        element.style.removeProperty('transform-origin')
         element.style.removeProperty('transform')
     }
     if (element.style.length === 0) {
