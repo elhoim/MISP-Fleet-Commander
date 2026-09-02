@@ -132,8 +132,9 @@ export default {
     },
     computed: {
         getHeaderOptions() {
+            let escapedDelimiter = this.delimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
             let regex = new RegExp(
-                `${this.delimiter}(?=(?:[^"]*"[^"]*")*[^"]*$)`
+                `${escapedDelimiter}(?=(?:[^"]*"[^"]*")*[^"]*$)`
             )
             let header = this.csvHeader.split(regex)
             header = header.map(str => {
