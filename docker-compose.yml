@@ -40,6 +40,7 @@ services:
             - FLASK_CONFIG=config.ProductionConfig
             - SQLALCHEMY_DATABASE_URI=/app/database/database.db
             - SQLALCHEMY_TRACK_MODIFICATIONS=1
+            - SECRET_KEY=${SECRET_KEY:-}
             - REDIS_URL=redis
             - REDIS_PORT=6379
             - REDIS_DB=1

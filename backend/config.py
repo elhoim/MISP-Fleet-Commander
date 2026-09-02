@@ -1,9 +1,7 @@
 from os import environ
 from os import fdopen
-from os import getpid
 from os import makedirs
 from os import open as osOpen
-from os import replace
 from os import path as osPath
 from os import O_CREAT, O_EXCL, O_WRONLY
 import secrets
@@ -24,19 +22,21 @@ def getPersistentSecretKey():
     makedirs(keyDir, exist_ok=True)
     for _ in range(10):
         try:
+            fd = osOpen(keyPath, O_CREAT | O_EXCL | O_WRONLY, 0o600)
+        except FileExistsError:
+            pass
+        else:
+            with fdopen(fd, 'w') as f:
+                f.write(secrets.token_hex())
+        try:
             with open(keyPath) as f:
                 key = f.read().strip()
             if key:
                 return key
         except FileNotFoundError:
-            tmpPath = f'{keyPath}.{getpid()}'
-            fd = osOpen(tmpPath, O_CREAT | O_EXCL | O_WRONLY, 0o600)
-            with fdopen(fd, 'w') as f:
-                f.write(secrets.token_hex())
-            replace(tmpPath, keyPath)
-            continue
+            pass
         sleep(0.1)
-    raise RuntimeError(f'Unable to read or create the secret key file {keyPath}')
+    raise RuntimeError(f'The secret key file {keyPath} is missing or empty')
 
 
 class Config:
