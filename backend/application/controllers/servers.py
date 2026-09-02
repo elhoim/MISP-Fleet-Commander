@@ -532,7 +532,7 @@ def parseGetSyncOvertime(syncLogs, afterTime=None):
                     'proposals': parsedChange.group('proposals'),
                     'sightings': parsedChange.group('sightings')
                 }
-                servers[url][created] = syncMetrics
+                servers[url][int(created.timestamp())] = syncMetrics
     return servers
 
 def parseGetLoginLogs(loginLogs, afterTime=None):
