@@ -181,7 +181,8 @@ export default {
                     this.handleQueryResponse(responses)
                 })
                 .catch(error => {
-                    this.$bvToast.toast(error.message, {
+                    const message = typeof error === "string" ? error : (error?.message ?? "Something went wrong.")
+                    this.$bvToast.toast(message, {
                         title: "Could not perform the batch API call",
                         variant: "danger",
                         solid: true
