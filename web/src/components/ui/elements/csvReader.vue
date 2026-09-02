@@ -137,8 +137,6 @@ export default {
             )
             let header = this.csvHeader.split(regex)
             header = header.map(str => {
-                str = str.trim()
-
                 if (str.startsWith('"') && str.endsWith('"')) {
                     str = str.slice(1, -1).replace(/""/g, '"')
                 }
