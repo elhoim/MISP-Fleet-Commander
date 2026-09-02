@@ -525,7 +525,9 @@ def parseGetSyncOvertime(syncLogs, afterTime=None):
             if created > afterTime:
                 url = re.search(r'Pull from (?P<url>[\S]+) .*', title).group('url')
                 change = logEntry['Log']['change']
-                parsedChange = re.search(r'(?P<events>[\d]+) events, (?P<proposals>[\d]+) proposals and (?P<sightings>[\d]+) sightings pulled or updated. (?P<events_failed>[\d]+) events failed or didn\'t need an update.', change)
+                parsedChange = re.search(r'(?P<events>[\d]+) events, (?P<proposals>[\d]+) proposals(?:,| and) (?P<sightings>[\d]+) sightings.*? pulled or updated\. (?P<events_failed>[\d]+) events failed or didn\'t need an update.', change)
+                if parsedChange is None:
+                    continue
                 syncMetrics = {
                     'events': parsedChange.group('events'),
                     'events_failed': parsedChange.group('events_failed'),
