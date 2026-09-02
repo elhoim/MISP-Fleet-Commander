@@ -68,10 +68,10 @@ export default {
             return this.clockNoMargin ? "" : "mr-1"
         },
         timestampDate() {
-            return moment(this.integerTimestamp * 1000).format("ddd DD/MM/YYYY HH:mm")
+            return this.validTimestamp === false ? "" : moment(this.integerTimestamp * 1000).format("ddd DD/MM/YYYY HH:mm")
         },
         timestampFromNow() {
-            return moment(this.integerTimestamp * 1000).fromNow()
+            return this.validTimestamp === false ? "" : moment(this.integerTimestamp * 1000).fromNow()
         },
         timestampTitle() {
             return this.type == "from" ? this.timestampDate : this.timestampFromNow
@@ -79,7 +79,7 @@ export default {
     },
     methods: {
         genFromNow() {
-            return moment(this.integerTimestamp * 1000).fromNow() 
+            return this.validTimestamp === false ? "" : moment(this.integerTimestamp * 1000).fromNow() 
         },
     },
     mounted() {
