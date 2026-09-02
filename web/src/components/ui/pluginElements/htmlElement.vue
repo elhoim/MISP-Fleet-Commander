@@ -21,12 +21,13 @@ const ALLOWED_TAG_ATTRIBUTES = {
 }
 const URL_ATTRIBUTES = { a: 'href', iframe: 'src', img: 'src' }
 const ALLOWED_URL_PROTOCOLS = { a: ['http:', 'https:', 'mailto:'], iframe: ['http:', 'https:'], img: ['http:', 'https:'] }
-// Only geometry properties survive, so an inline style cannot be used to overlay
-// or reskin the surrounding page.
+// Only geometry properties survive, and a transform may only shrink, so an
+// inline style cannot be used to float content over the surrounding page.
 const ALLOWED_STYLE_PROPERTIES = new Set([
     'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
     'transform', 'transform-origin', 'background-color',
 ])
+const ALLOWED_TRANSFORM = /^scale\((0(\.\d+)?|1)(, ?(0(\.\d+)?|1))?\)$/
 
 function isSafeUrl(url, protocols) {
     try {
@@ -42,6 +43,9 @@ function sanitizeStyle(element) {
             element.style.removeProperty(property)
         }
     })
+    if (element.style.transform && !ALLOWED_TRANSFORM.test(element.style.transform)) {
+        element.style.removeProperty('transform')
+    }
     if (element.style.length === 0) {
         element.removeAttribute('style')
     }
