@@ -9,36 +9,66 @@ const ALLOWED_TAGS = new Set([
     'a', 'abbr', 'b', 'blockquote', 'br', 'caption', 'code', 'dd', 'div', 'dl', 'dt',
     'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'li', 'ol', 'p', 'pre',
     'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th',
-    'thead', 'tr', 'u', 'ul',
+    'thead', 'tr', 'u', 'ul', 'iframe', 'img',
 ])
-const ALLOWED_ATTRIBUTES = new Set(['class', 'title', 'colspan', 'rowspan'])
-const ALLOWED_URL_PROTOCOLS = ['http:', 'https:', 'mailto:']
+const ALLOWED_ATTRIBUTES = new Set(['class', 'title', 'colspan', 'rowspan', 'style'])
+// Embedding is kept for plugins rendering a remote dashboard (see GrafanaPanel),
+// restricted to a fixed set of attributes and to http(s) sources.
+const ALLOWED_TAG_ATTRIBUTES = {
+    a: new Set(['href']),
+    iframe: new Set(['src', 'width', 'height', 'frameborder']),
+    img: new Set(['src', 'alt', 'width', 'height']),
+}
+const URL_ATTRIBUTES = { a: 'href', iframe: 'src', img: 'src' }
+const ALLOWED_URL_PROTOCOLS = { a: ['http:', 'https:', 'mailto:'], iframe: ['http:', 'https:'], img: ['http:', 'https:'] }
+// Only geometry properties survive, so an inline style cannot be used to overlay
+// or reskin the surrounding page.
+const ALLOWED_STYLE_PROPERTIES = new Set([
+    'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
+    'transform', 'transform-origin', 'background-color',
+])
 
-function isSafeUrl(url) {
+function isSafeUrl(url, protocols) {
     try {
-        return ALLOWED_URL_PROTOCOLS.includes(new URL(url, window.location.href).protocol)
+        return protocols.includes(new URL(url, window.location.href).protocol)
     } catch (error) {
         return false
+    }
+}
+
+function sanitizeStyle(element) {
+    Array.from(element.style).forEach((property) => {
+        if (!ALLOWED_STYLE_PROPERTIES.has(property)) {
+            element.style.removeProperty(property)
+        }
+    })
+    if (element.style.length === 0) {
+        element.removeAttribute('style')
     }
 }
 
 function sanitizeChildren(element) {
     Array.from(element.children).forEach((child) => {
         const tagName = child.tagName.toLowerCase()
-        if (!ALLOWED_TAGS.has(tagName)) {
+        // `is` cannot be removed once parsed, so the element itself has to go.
+        if (!ALLOWED_TAGS.has(tagName) || child.hasAttribute('is')) {
             child.remove()
             return
         }
+        const tagAttributes = ALLOWED_TAG_ATTRIBUTES[tagName]
         Array.from(child.attributes).forEach((attribute) => {
             const name = attribute.name.toLowerCase()
-            if (tagName === 'a' && name === 'href') {
-                if (!isSafeUrl(attribute.value)) {
+            if (name === URL_ATTRIBUTES[tagName]) {
+                if (!isSafeUrl(attribute.value, ALLOWED_URL_PROTOCOLS[tagName])) {
                     child.removeAttribute(attribute.name)
                 }
-            } else if (!ALLOWED_ATTRIBUTES.has(name)) {
+            } else if (!ALLOWED_ATTRIBUTES.has(name) && !(tagAttributes && tagAttributes.has(name))) {
                 child.removeAttribute(attribute.name)
             }
         })
+        if (child.hasAttribute('style')) {
+            sanitizeStyle(child)
+        }
         sanitizeChildren(child)
     })
 }
