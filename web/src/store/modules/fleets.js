@@ -149,6 +149,8 @@ const mutations = {
         })
     },
     setFleet(state, fleet) {
+        if (fleet === undefined || fleet === null || fleet.id === undefined)
+            return
         const knownFleet = state.all[fleet.id]
         const updatedFleet = knownFleet !== undefined ? {...knownFleet, ...fleet} : fleet
         Vue.set(state.all, fleet.id, updatedFleet)
