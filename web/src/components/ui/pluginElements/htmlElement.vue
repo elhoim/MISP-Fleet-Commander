@@ -11,7 +11,10 @@ const ALLOWED_TAGS = new Set([
     'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th',
     'thead', 'tr', 'u', 'ul', 'iframe', 'img',
 ])
-const ALLOWED_ATTRIBUTES = new Set(['class', 'title', 'colspan', 'rowspan', 'style'])
+// `class` is deliberately not allowed: bootstrap.css is loaded globally (see
+// web/src/main.js), so a kept class would let plugin HTML address the whole
+// application class namespace, including positioned overlay classes.
+const ALLOWED_ATTRIBUTES = new Set(['title', 'colspan', 'rowspan', 'style'])
 // Embedding is kept for plugins rendering a remote dashboard (see GrafanaPanel),
 // restricted to a fixed set of attributes and to http(s) sources.
 const ALLOWED_TAG_ATTRIBUTES = {
